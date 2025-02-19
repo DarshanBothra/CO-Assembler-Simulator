@@ -110,10 +110,17 @@ def main(filename):
     global count
     count = 1
     ct = 0
-    for line in lines:
-        if ':' in str(line):
-            line = line.strip()
-            label, instruct, reg = line.split(" ")
+    for i in range(len(lines)):
+        if ':' in str(lines[i]):
+            ind = lines.index(lines[i])
+            line = lines[i].strip()
+            if ": " not in str(line):
+                print(line)
+                new = line.replace(":", ": ")
+                print(new)
+                lines[ind] = new
+
+            label, instruct, reg = lines[i].split(" ")
 
             for key, value in label_dict.items():
                 if value == count:
@@ -129,59 +136,70 @@ def main(filename):
     # if label_dict:
         # print(label_dict[list(label_dict.items())[0][0]])
         # label_dict[list(label_dict.items())[0][0]] = label_dict[list(label_dict.items())[0][0]]-1
+
     count = 0
     for line in lines:
-        line = line.strip()
-        particular_line = line.split()
+        try:
+            line = line.strip()
+            particular_line = line.split()
+            # if ":" in line:
+            #     if ": " not in line:
+            #         particular_line = line.split()
+            #         reg = particular_line[1]
+            #         label, instruct = particular_line[0].split(":")[0]+":"
+            #         particular_line = [label, instruct, reg]
+            if ":" in particular_line[0]:
+                label = particular_line[0][:particular_line[0].index(":")]
+                if len(particular_line) > 1:
+                    instruction = particular_line[1]
+                else:
+                    instruction = None
 
-        if ":" in particular_line[0]:
-            label = particular_line[0][:-1]
+                if len(particular_line) > 2:
+                    register = particular_line[2]
+                    registerlist = register.split(",")
+                else:
+                    register = None
 
-            if len(particular_line) > 1:
-                instruction = particular_line[1]
+                label_dict[label] = count
+
             else:
-                instruction = None
+                instruction = particular_line[0]
 
-            if len(particular_line) > 2:
-                register = particular_line[2]
-                registerlist = register.split(",")
+                if len(particular_line) > 1:
+                    register = particular_line[1]
+                    registerlist = register.split(',')
+                else:
+                    register = None
+                count += 1
+            if instruction == None or register == None:
+                print(instruction)
+                print(register)
+                print("Error!!")
+            elif instruction in instructionR:
+                res = r_type(registerlist, instruction)
+            elif instruction in instructionI:
+                res = i_type(registerlist, instruction)
+            elif instruction in instructionS:
+                res = s_type(registerlist)
+            elif instruction in instructionB:
+                res = b_type(registerlist, instruction)
+            elif instruction in instructionJ:
+                res = j_type(registerlist)
+            elif instruction in instructionbonus:
+                res = bonustype(registerlist, instruction)
+
             else:
-                register = None
+                res = "Error"
+            print(res)
+            output.append(res)
+        except:
+            print("Error")
+            output.append("\n")
 
-            label_dict[label] = count
-
-        else:
-            instruction = particular_line[0]
-
-            if len(particular_line) > 1:
-                register = particular_line[1]
-                registerlist = register.split(',')
-            else:
-                register = None
-            count += 1
-        if instruction == None or register == None:
-            print("Error!!")
-        elif instruction in instructionR:
-            res = r_type(registerlist, instruction)
-        elif instruction in instructionI:
-            res = i_type(registerlist, instruction)
-        elif instruction in instructionS:
-            res = s_type(registerlist)
-        elif instruction in instructionB:
-            res = b_type(registerlist, instruction)
-        elif instruction in instructionJ:
-            res = j_type(registerlist)
-        elif instruction in instructionbonus:
-            res = bonustype(registerlist, instruction)
-
-        else:
-            res = "Error"
-        print(res)
-        output.append(res)
-
-    with open("answer.txt", "w") as f:
-        for item in output:
-            f.write(item+"\n")
+        with open("answer.txt", "w") as f:
+            for item in output:
+                f.write(item+"\n")
 
 
 # 11111110100001001101000011100011 # Solution
